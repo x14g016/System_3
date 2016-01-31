@@ -1,0 +1,792 @@
+
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>脱出おめでとう！</title>
+<meta http-equiv="Content-Script-Type" content="text/JavaScript">
+<meta http-equiv="Content-Style-Type" content="text/CSS">
+<SCRIPT type="text/JavaScript" src="Scripts/AflLib.js"></SCRIPT>
+<style type="text/css">
+body {
+	margin-top: 0 !important;
+}
+</style>
+
+</head>
+<body>
+
+	<script type="text/JavaScript">
+
+
+	document.addEventListener("DOMContentLoaded", main, false);
+
+	function main(){
+		var timedata = {"a":null,"b":null,"c":null};
+		AFL.sendJson("Main",timedata,onRecv);
+	}
+
+
+		function onRecv(datas){
+			var data0 = datas[0]
+			var data1 = datas[1];
+			var data2 = datas[2];
+			var data3 = datas[3];
+			var data4 = datas[4];
+
+
+
+		/*========================================*/
+		/*　　　 地形マップのデータ　　　　　　*/
+		/*========================================*/
+
+		image_dot = new Array();
+		image_dot[0] = "maptip.png"; //地面
+		image_dot[1] = "maptip2.png"; //通路
+		image_dot[2] = "maptip3.png"; //壁
+		image_dot[10] = "tukasa1.png"; //
+		image_dot[11] = "tukasa4.png"; //↑
+		image_dot[12] = "tukasa7.png"; //→
+		image_dot[13] = "tukasa8.png"; //←
+		image_dot[14] = "tukasa1-2.png"; //2
+		image_dot[15] = "tukasa4-2.png"; //↑2
+		image_dot[16] = "tukasa7-2.png"; //→2
+		image_dot[17] = "tukasa8-2.png"; //←2
+		image_dot[5] = "sena1.png"; //I
+		image_dot[6] = "ritu1.png"; //R
+		image_dot[7] = "arasi1.png"; //A
+		image_dot[8] = "reo1.png"; //L
+
+		/*========================================*/
+		/*　　　 地形データの生成空データ　　　*/
+		/*========================================*/
+
+		// chipdate[i][j]の8×8の配列を作る
+		chipdate = new Array();
+		for (i = 0; i <= 7; i++) {
+			chipdate[i] = new Array();
+
+		}
+
+		// chipdate[i][j]に0~63のデータを格納する、後述<span>で仕様
+		num_plus = 0
+		for (i = 0; i <= 7; i++) {
+			for (j = 0; j <= 11; j++) {
+				chipdate[i][j] = num_plus;
+				num_plus++;
+			}
+		}
+
+		document.write();
+
+		// <span id="chip0">〜<span id="chip63">のデータを生成する
+		document
+				.write("<table border='0' cellpadding='0' cellspacing='0' margin='0' style='border:1px solid #000;'>")
+		for (i = 0; i <= 7; i++) {
+			document.write("<tr>");
+			if (i == 0)
+				document
+						.write("<td style='background-color:#000;width:186px' rowspan='8'>")
+			for (j = 0; j <= 12; j++) {
+				document.write('<td id="chip' + chipdate[i][j] + '"></td>');
+			}
+			if (i == 0)
+				document
+						.write("<td style='background-color:#000;width:186px' rowspan='8'>")
+			document.write("</tr>");
+		}
+		//会話ボックス生成
+		document
+				.write("<tr><td style='background-color:#000;border:double#fff;height:150px;color:#fff;font-size:14px;padding:2px;' colspan='15' id='comment' valign='top' align='left'>　</td></tr></table>");
+
+		//mapの配列を作成する
+		map = new Array();
+		for (i = 0; i <= 11; i++) {
+			map[i] = new Array();
+		}
+
+		/////////////////////////////////map///////////////////////////////////////////////////////
+
+		Lmap = new Array();
+		for (i = 0; i <= 24; i++) {
+			map[i] = new Array();
+		}
+
+		Lmap[0] = [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+				2, 2, 2, 2, 2, 2, 2, 2, 2, 2 ];
+		Lmap[1] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[2] = [ 2, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1,
+				1, 1, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[3] = [ 2, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1,
+				1, 1, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[4] = [ 2, 0, 1, 1, 5, 1, 1, 0, 0, 0, 1, 1, 6, 1, 1, 0, 0, 0, 1, 1,
+				7, 1, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[5] = [ 2, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1,
+				1, 1, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[6] = [ 2, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1,
+				1, 1, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[7] = [ 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+				1, 0, 0, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[8] = [ 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+				1, 0, 0, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[9] = [ 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+				1, 0, 0, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[10] = [ 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 ];
+		Lmap[11] = [ 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 ];
+		Lmap[12] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[13] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[14] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[15] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[16] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2 ];
+		Lmap[17] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 2 ];
+		Lmap[18] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 2 ];
+		Lmap[19] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 2 ];
+		Lmap[20] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 2 ];
+		Lmap[21] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 2 ];
+		Lmap[22] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 2 ];
+		Lmap[23] = [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+				2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 ];
+
+		//マップの配置:正式
+
+		map[0] = [ 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ];
+		map[1] = [ 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ];
+		map[2] = [ 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ];
+		map[3] = [ 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ];
+		map[4] = [ 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ];
+		map[5] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+		map[6] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+		map[7] = [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+
+		Lmapsa = 7;
+		Lmapsb = 0;
+
+		////////////////////////////////////////////////////////////////////////////////////////
+
+		//司くんの初期位置
+		map[3][1] = 10; //if文の10
+
+		tukasa_move = new Array();
+		for (x = 0; x <= 7; x++) {
+			tukasa_move[x] = new Array();
+		}
+
+		num_plus = 0;
+		for (x = 0; x <= 7; x++) {
+			for (y = 0; y <= 11; y++) {
+				tukasa_move[x][y] = num_plus;
+				num_plus++;
+			}
+		}
+
+		// マップ分け
+
+		//num_plus = 0
+		for (i = 0; i <= 7; i++) {
+			for (j = 0; j <= 11; j++) {
+				if (map[i][j] == 0) {
+					document.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[0] + "'>";
+				}
+				if (map[i][j] == 1) {
+					document.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[1] +"'>";
+				}
+				if (map[i][j] == 2) {
+					document.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[2] +"'>";
+				}
+				if (map[i][j] == 10) {
+					document.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[16] + "'>";
+					//tukasa_move[i][j] = chipdate[i][j]; //現在いる位置を入れる
+					a = i; // 司君の縦軸
+					b = j; // 司君の横軸
+					map[3][1] = 1;
+				}
+				//num_plus++;
+			}
+		}
+		document.getElementById("comment").innerHTML = "移動:十字キー";
+
+		/*========================================*/
+		/*　　　 会話データ　　　　　　　　　　*/
+		/*========================================*/
+
+		//I
+		izumi = new Array();
+		izumi[0] = "FJB生徒I：<br>　　　一番速い脱出ﾀｲﾑは"+data0.minutes+"分"+data0.sec+"秒だけどぉ";
+		izumi[1] = "FJB生徒I：<br>　　　ｱﾝﾀも頑張んなよぉ";
+		izumi[2] = "FJB生徒I：<br>　　　ﾊｲｵﾊﾖ～";
+		izumi[3] = "FJB生徒I：<br>　　　ﾅｧﾆ";
+		izumi[4] = "FJB生徒I：<br>　　　ｱﾉｻｧ";
+		for (z = 5; z <= 100; z += 2) {//無限に続かせる
+			izumi[z] = "FJB生徒I：<br>　　　HJAJ";
+		}
+		for (z = 6; z <= 100; z += 2) {//無限に続かせる
+			izumi[z] = "　";
+		}
+
+		//A
+		arashi = new Array();
+		arashi[0] = "FJB生徒A：<br>　　　今日のお昼は";
+		arashi[1] = "FJB生徒A：<br>　　　鶏のから揚げよォ";
+		arashi[2] = "FJB生徒A：<br>　　　猫を飼ってるの";
+		arashi[3] = "FJB生徒A：<br>　　　名前はにゃんこっていうのよォ";
+		arashi[4] = "FJB生徒A：<br>　　　あらあら～";
+		for (z = 5; z <= 100; z += 2) {//無限に続かせる
+			arashi[z] = "FJB生徒A：<br>　　　うふふ";
+		}
+		for (z = 6; z <= 100; z += 2) {//無限に続かせる
+			arashi[z] = "　";
+		}
+
+		//L
+		reo = new Array();
+		reo[0] = "FJB生徒L：<br>　　　うっちゅ～☆";
+		reo[1] = "FJB生徒L：<br>　　　ねえ うっちゅ～☆って挨拶知ってる？";
+		reo[2] = "FJB生徒L：<br>　　　ああっインスピレーションが！";
+		reo[3] = "FJB生徒L：<br>　　　わははははははは☆";
+		reo[4] = "FJB生徒L：<br>　　　俺は裸の王様だ☆";
+		for (z = 5; z <= 100; z += 2) {//無限に続かせる
+			reo[z] = "FJB生徒L：<br>　　　うっちゅ～☆って言ってみ！";
+		}
+		for (z = 6; z <= 100; z += 2) {//無限に続かせる
+			reo[z] = "　";
+		}
+
+		//R
+		ritu = new Array();
+		ritu[0] = "FJB生徒R：<br>　　　ううん………";
+		ritu[1] = "FJB生徒R：<br>　　　……";
+		ritu[2] = "FJB生徒R：<br>　　　……";
+		ritu[3] = "FJB生徒R：<br>　　　……";
+		ritu[4] = "FJB生徒R：<br>　　　1st."+data0.minutes+":"+data0.sec+"<br>"+
+		"　　　2nd."+data1.minutes+":"+data1.sec+"<br>"+
+  		"　　　3rd."+data2.minutes+":"+data2.sec+"<br>"+
+  		"　　　4th."+data3.minutes+":"+data3.sec+"<br>"+
+  		"　　　5th."+data4.minutes+":"+data4.sec+"<br>"+
+		"　　　………むにゃ";
+		ritu[5] = "FJB生徒R：<br>　　　……";
+		for (z = 5; z <= 100; z += 2) {//無限に続かせる
+			ritu[z] = "寝ているようだ";
+		}
+		for (z = 6; z <= 100; z += 2) {//無限に続かせる
+			ritu[z] = "　";
+		}
+
+		/*========================================*/
+		/*　　　 移動アクション　　　　　　　　*/
+		/*========================================*/
+
+		Ctrlkey = 0; // コメントアクション:Ctrl
+		Enter = 0;
+		izumi_took = 0; //喋りコメント回数
+		arashi_took = 0;
+		ritu_took = 0;
+		reo_took = 0;
+
+		function move_chara(e) {
+
+			switch (e.keyCode) {
+
+			case 37://←:こっちに移動する時
+
+				if (map[a][b - 1] == 5) {//Iのいる位置
+					var timedata = {"a":null,"b":null,"c":null};
+					AFL.sendJson("Main",timedata,onRecv);
+					function onRecv(datas){
+
+					}
+					document.getElementById("comment").innerHTML = izumi[izumi_took];
+					izumi_took++;
+					if (izumi_took > 6) {
+						izumi_took = 0;
+					}
+				} else if (map[a][b - 1] == 7) {
+					document.getElementById("comment").innerHTML = arashi[arashi_took];
+					arashi_took++;
+					if (arashi_took > 6) {
+						arashi_took = 0;
+					}
+				} else if (map[a][b - 1] == 6) {
+					document.getElementById("comment").innerHTML = ritu[ritu_took];
+					ritu_took++;
+					if (ritu_took > 6) {
+						ritu_took = 0;
+					}
+				} else if (map[a][b - 1] == 8) {
+					document.getElementById("comment").innerHTML = reo[reo_took];
+					reo_took++;
+					if (reo_took > 6) {
+						reo_took = 0;
+					}
+				}
+				if (b - 1 < 5 && Lmapsb != 0 && map[a][b - 1] < 2) {//マップ移動がある場合
+					Lmapsb--;//横座標を減らす
+					for (i = 0; i < 8; i++) {//表示マップに読み込み
+						for (n = 0; n < 12; n++) {
+							map[i][n] = Lmap[Lmapsa + i][Lmapsb + n];
+						}
+					}
+					for (i = 0; i <= 7; i++) {
+						for (j = 0; j <= 11; j++) {
+							if (map[i][j] == 0) {//床
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[0] + "'>";
+							}
+							if (map[i][j] == 1) {//床
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[1] + "'>";
+							}
+							if (map[i][j] == 2) {//壁
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[2] +"'>";
+							}
+							if (map[i][j] == 5) {//I
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[5] + "'>";
+							}
+							if (map[i][j] == 6) {//R
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[6] + "'>";
+							}
+							if (map[i][j] == 7) {//A
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[7] + "'>";
+							}
+							if (map[i][j] == 8) {//L
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[8] + "'>";
+							}
+						}
+					}
+					//マップを動かしたから位置はそのまま表示
+					if (map[a][b] == 0) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[13] + "'>";
+					}
+					if (map[a][b] == 1) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[17] + "'>";
+					}
+				} else {//マップ移動がない場合
+					if (map[a][b - 1] == 0) {
+						document.getElementById("chip" + chipdate[a][b - 1]).innerHTML = "<img src='" + image_dot[13] + "'>";
+					}
+					if (map[a][b - 1] == 1) {
+						document.getElementById("chip" + chipdate[a][b - 1]).innerHTML = "<img src='" + image_dot[17] + "'>";
+					}
+					if (map[a][b] == 0) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[0] + "'>";
+					}
+					if (map[a][b] == 1) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[1] + "'>";
+					}
+					if (map[a][b - 1] > 1) {
+						if (map[a][b] == 0) {
+							document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[13] + "'>";
+						}
+						if (map[a][b] == 1) {
+							document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[17] + "'>";
+						}
+					} else {
+						b--;
+					}
+				}
+				break;
+
+			// 				case 38://↑:こっちに移動する時
+
+			// 					if(map[a-1][b]==5){//セナ先輩のいる位置
+			// 						document.getElementById("comment").innerHTML = izumi[izumi_took];
+			// 						izumi_took++;
+			// 						if(izumi_took>6){izumi_took=0;}
+			// 					}else if(map[a-1][b]==7){
+			// 						document.getElementById("comment").innerHTML = arashi[arashi_took];
+			// 						arashi_took++;
+			// 						if(arashi_took>6){arashi_took=0;}
+			// 					}else if(map[a-1][b]==6){
+			// 						document.getElementById("comment").innerHTML = ritu[ritu_took];
+			// 						ritu_took++;
+			// 						if(ritu_took>6){ritu_took=0;}
+			// 					}else if(map[a-1][b]==8){
+			// 						document.getElementById("comment").innerHTML = reo[reo_took];
+			// 						reo_took++;
+			// 						if(reo_took>6){reo_took=0;}
+			// 					}
+
+			// 					if(a-1<6 && Lmapsa!=0 && map[a-1][b] < 2){//マップ移動がある場合
+			// 						Lmapsa--;//縦座標を減らす
+			// 						for(i=0;i<8;i++){//表示マップに読み込み
+			// 							for(n=0;n<12;n++){
+			// 								map[i][n]=Lmap[Lmapsa+i][Lmapsb+n];
+			// 							}
+			// 						}
+			// 						for(i=0;i<=7;i++){
+			// 							for(j=0;j<=11;j++){
+			// 								if(map[i][j] == 0){//床
+			// 									document.getElementById("chip"+chipdate[i][j]).innerHTML = "<img src='" + image_dot[0] + "'>";
+			// 								}
+			// 								if(map[i][j] == 1){//床
+			// 									document.getElementById("chip"+chipdate[i][j]).innerHTML = "<img src='" + image_dot[1] + "'>";
+			// 								}
+			// 								if(map[i][j] == 2){//壁
+			// 									document.getElementById("chip"+chipdate[i][j]).innerHTML = "<img src='" + image_dot[2] +"'>";
+			// 								}
+			// 								if(map[i][j] == 5){//せないずみ
+			// 									document.getElementById("chip"+chipdate[i][j]).innerHTML = "<img src='" + image_dot[5] + "'>";
+			// 								}
+			// 								if(map[i][j] == 6){//リッツ
+			// 									document.getElementById("chip"+chipdate[i][j]).innerHTML = "<img src='" + image_dot[6] + "'>";
+			// 								}
+			// 								if(map[i][j] == 7){//なるくん
+			// 									document.getElementById("chip"+chipdate[i][j]).innerHTML = "<img src='" + image_dot[7] + "'>";
+			// 								}
+			// 								if(map[i][j] == 8){//レオ様
+			// 									document.getElementById("chip"+chipdate[i][j]).innerHTML = "<img src='" + image_dot[8] + "'>";
+			// 								}
+			// 							}
+			// 						}
+			// 						//マップを動かしたから司くんの位置はそのまま表示
+			// 						if(map[a][b] == 0){
+			// 							document.getElementById("chip"+chipdate[a][b]).innerHTML = "<img src='" + image_dot[11] + "'>";
+			// 						}
+			// 						if(map[a][b] == 1){
+			// 							document.getElementById("chip"+chipdate[a][b]).innerHTML = "<img src='" + image_dot[15] + "'>";
+			// 						}
+			// 					}else{//マップ移動がない場合
+			// 						if(map[a-1][b] == 0){
+			// 							document.getElementById("chip"+chipdate[a-1][b]).innerHTML = "<img src='" + image_dot[11] + "'>";
+			// 						}
+			// 						if(map[a-1][b] == 1){
+			// 							document.getElementById("chip"+chipdate[a-1][b]).innerHTML = "<img src='" + image_dot[15] + "'>";
+			// 						}
+			// 						if(map[a][b]==0){
+			// 							document.getElementById("chip"+chipdate[a][b]).innerHTML = "<img src='" + image_dot[0] + "'>";
+			// 						}
+			// 						if(map[a][b]==1){
+			// 							document.getElementById("chip"+chipdate[a][b]).innerHTML = "<img src='" + image_dot[1] + "'>";
+			// 						}
+			// 						if(map[a-1][b]>1){
+			// 							if(map[a][b] == 0){
+			// 								document.getElementById("chip"+chipdate[a][b]).innerHTML = "<img src='" + image_dot[11] + "'>";
+			// 							}
+			// 							if(map[a][b] == 1){
+			// 								document.getElementById("chip"+chipdate[a][b]).innerHTML = "<img src='" + image_dot[15] + "'>";
+			// 							}
+			// 						}else{
+			// 							a--;
+			// 						}
+			// 					}
+			// 					break;
+
+			case 38://↑:こっちに移動する時
+
+				if (map[a - 1][b] == 5) {//セナ先輩のいる位置
+					document.getElementById("comment").innerHTML = izumi[izumi_took];
+					document.getElementById("chip" + chipdate[a - 2][b]).innerHTML = "<img src='" + image_dot[1] + "'>";
+					izumi_took++;
+					if (izumi_took >= 5) {
+						document.getElementById("chip" + chipdate[a - 2][b]).innerHTML = "<img src='" + image_dot[20] + "'>";
+					}
+					if (izumi_took > 6) {
+						izumi_took = 0;
+					}
+				} else if (map[a - 1][b] == 7) {
+					document.getElementById("comment").innerHTML = arashi[arashi_took];
+					arashi_took++;
+					document.getElementById("chip" + chipdate[a - 2][b]).innerHTML = "<img src='" + image_dot[19] + "'>";
+					if (arashi_took > 6) {
+						arashi_took = 0;
+						document.getElementById("chip" + chipdate[a - 2][b]).innerHTML = "<img src='" + image_dot[1] + "'>";
+					}
+				} else if (map[a - 1][b] == 6) {
+					document.getElementById("comment").innerHTML = ritu[ritu_took];
+					ritu_took++;
+					if (ritu_took > 1) {
+						document.getElementById("chip" + chipdate[a - 1][b]).innerHTML = "<img src='" + image_dot[3] + "'>";
+					}
+					if (ritu_took >= 5) {
+						document.getElementById("chip" + chipdate[a - 2][b]).innerHTML = "<img src='" + image_dot[21] + "'>";
+					}
+					if (ritu_took > 6) {
+						ritu_took = 0;
+					}
+					if (ritu_took == 0) {
+						document.getElementById("chip" + chipdate[a - 2][b]).innerHTML = "<img src='" + image_dot[1] + "'>";
+					}
+				} else if (map[a - 1][b] == 8) {
+					document.getElementById("comment").innerHTML = reo[reo_took];
+					reo_took++;
+					if (reo_took == 4) {
+						document.getElementById("chip" + chipdate[a - 2][b]).innerHTML = "<img src='" + image_dot[22] + "'>";
+						imgTimer();
+					}
+					if (reo_took > 6) {
+						document.getElementById("chip" + chipdate[a - 2][b]).innerHTML = "<img src='" + image_dot[0] + "'>";
+						reo_took = 0;
+					}
+				}
+
+				if (a - 1 < 6 && Lmapsa != 0 && map[a - 1][b] < 2) {//マップ移動がある場合
+					Lmapsa--;//縦座標を減らす
+					for (i = 0; i < 8; i++) {//表示マップに読み込み
+						for (n = 0; n < 12; n++) {
+							map[i][n] = Lmap[Lmapsa + i][Lmapsb + n];
+						}
+					}
+					for (i = 0; i <= 7; i++) {
+						for (j = 0; j <= 11; j++) {
+							if (map[i][j] == 0) {//床
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[0] + "'>";
+							}
+							if (map[i][j] == 1) {//床
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[1] + "'>";
+							}
+							if (map[i][j] == 2) {//壁
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[2] +"'>";
+							}
+							if (map[i][j] == 5) {//せないずみ
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[5] + "'>";
+							}
+							if (map[i][j] == 6) {//リッツ
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[6] + "'>";
+							}
+							if (map[i][j] == 7) {//なるくん
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[7] + "'>";
+							}
+							if (map[i][j] == 8) {//レオ様
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[8] + "'>";
+							}
+						}
+					}
+					//マップを動かしたから司くんの位置はそのまま表示
+					if (map[a][b] == 0) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[11] + "'>";
+					}
+					if (map[a][b] == 1) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[15] + "'>";
+					}
+				} else {//マップ移動がない場合
+					if (map[a - 1][b] == 0) {
+						document.getElementById("chip" + chipdate[a - 1][b]).innerHTML = "<img src='" + image_dot[11] + "'>";
+					}
+					if (map[a - 1][b] == 1) {
+						document.getElementById("chip" + chipdate[a - 1][b]).innerHTML = "<img src='" + image_dot[15] + "'>";
+					}
+					if (map[a][b] == 0) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[0] + "'>";
+					}
+					if (map[a][b] == 1) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[1] + "'>";
+					}
+					if (map[a - 1][b] > 1) {
+						if (map[a][b] == 0) {
+							document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[11] + "'>";
+						}
+						if (map[a][b] == 1) {
+							document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[15] + "'>";
+						}
+					} else {
+						a--;
+					}
+				}
+				break;
+
+			case 39://→こっちに移動する時
+
+				if (map[a][b + 1] == 5) {//セナ先輩のいる位置
+					document.getElementById("comment").innerHTML = izumi[izumi_took];
+					izumi_took++;
+					if (izumi_took > 6) {
+						izumi_took = 0;
+					}
+				} else if (map[a][b + 1] == 7) {
+					document.getElementById("comment").innerHTML = arashi[arashi_took];
+					arashi_took++;
+					if (arashi_took > 6) {
+						arashi_took = 0;
+					}
+				} else if (map[a][b + 1] == 6) {
+					document.getElementById("comment").innerHTML = ritu[ritu_took];
+					ritu_took++;
+					if (ritu_took > 6) {
+						ritu_took = 0;
+					}
+				} else if (map[a][b + 1] == 8) {
+					document.getElementById("comment").innerHTML = reo[reo_took];
+					reo_took++;
+					if (reo_took > 6) {
+						reo_took = 0;
+					}
+				}
+				if (b + 1 > 6 && Lmapsb != 17 && map[a][b + 1] < 2) {//マップ移動がある場合
+					Lmapsb++;//横座標を増やす
+					for (i = 0; i < 8; i++) {//表示マップに読み込み
+						for (n = 0; n < 12; n++) {
+							map[i][n] = Lmap[Lmapsa + i][Lmapsb + n];
+						}
+					}
+					for (i = 0; i <= 7; i++) {
+						for (j = 0; j <= 11; j++) {
+							if (map[i][j] == 0) {//床
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[0] + "'>";
+							}
+							if (map[i][j] == 1) {//床
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[1] + "'>";
+							}
+							if (map[i][j] == 2) {//壁
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[2] +"'>";
+							}
+							if (map[i][j] == 5) {//せないずみ
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[5] + "'>";
+							}
+							if (map[i][j] == 6) {//リッツ
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[6] + "'>";
+							}
+							if (map[i][j] == 7) {//なるくん
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[7] + "'>";
+							}
+							if (map[i][j] == 8) {//レオ様
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[8] + "'>";
+							}
+						}
+					}
+					//マップを動かしたから司くんの位置はそのまま表示
+					if (map[a][b] == 0) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[12] + "'>";
+					}
+					if (map[a][b] == 1) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[16] + "'>";
+					}
+				} else {//マップ移動がない場合
+					if (map[a][b + 1] == 0) {
+						document.getElementById("chip" + chipdate[a][b + 1]).innerHTML = "<img src='" + image_dot[12] + "'>";
+					}
+					if (map[a][b + 1] == 1) {
+						document.getElementById("chip" + chipdate[a][b + 1]).innerHTML = "<img src='" + image_dot[16] + "'>";
+					}
+					if (map[a][b] == 0) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[0] + "'>";
+					}
+					if (map[a][b] == 1) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[1] + "'>";
+					}
+					if (map[a][b + 1] > 1) {
+						if (map[a][b] == 0) {
+							document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[12] + "'>";
+						}
+						if (map[a][b] == 1) {
+							document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[16] + "'>";
+						}
+					} else {
+						b++;
+					}
+
+				}
+				break;
+
+			case 40://↓
+
+				if (a + 1 > 4 && Lmapsa != 17 && map[a + 1][b] < 2) {//マップ移動がある場合
+					Lmapsa++;//縦座標を増やす
+					for (i = 0; i < 8; i++) {//表示マップに読み込み
+						for (n = 0; n < 12; n++) {
+							map[i][n] = Lmap[Lmapsa + i][Lmapsb + n];
+						}
+					}
+					for (i = 0; i <= 7; i++) {
+						for (j = 0; j <= 11; j++) {
+							if (map[i][j] == 0) {//床
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[0] + "'>";
+							}
+							if (map[i][j] == 1) {//床
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[1] + "'>";
+							}
+							if (map[i][j] == 2) {//壁
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[2] +"'>";
+							}
+							if (map[i][j] == 5) {//せないずみ
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[5] + "'>";
+							}
+							if (map[i][j] == 6) {//リッツ
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[6] + "'>";
+							}
+							if (map[i][j] == 7) {//なるくん
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[7] + "'>";
+							}
+							if (map[i][j] == 8) {//レオ様
+								document
+										.getElementById("chip" + chipdate[i][j]).innerHTML = "<img src='" + image_dot[8] + "'>";
+							}
+						}
+					}
+					//マップを動かしたから司くんの位置はそのまま表示
+					if (map[a][b] == 0) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[10] + "'>";
+					}
+					if (map[a][b] == 1) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[14] + "'>";
+					}
+				} else {//マップ移動がない場合
+					if (map[a + 1][b] == 0) {
+						document.getElementById("chip" + chipdate[a + 1][b]).innerHTML = "<img src='" + image_dot[10] + "'>";
+					}
+					if (map[a + 1][b] == 1) {
+						document.getElementById("chip" + chipdate[a + 1][b]).innerHTML = "<img src='" + image_dot[14] + "'>";
+					}
+					if (map[a][b] == 0) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[0] + "'>";
+					}
+					if (map[a][b] == 1) {
+						document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[1] + "'>";
+					}
+					if (map[a + 1][b] > 1) {
+						if (map[a][b] == 0) {
+							document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[10] + "'>";
+						}
+						if (map[a][b] == 1) {
+							document.getElementById("chip" + chipdate[a][b]).innerHTML = "<img src='" + image_dot[14] + "'>";
+						}
+					} else {
+						a++;
+					}
+				}
+				break;
+			}
+
+		}
+
+		document.onkeydown = move_chara;
+		}
+
+	</script>
